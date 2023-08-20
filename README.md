@@ -8,7 +8,8 @@
      - [ ] login as a Rider -> rider landing page
      - [ ] Login as a passenger -> passenger landing page
 
-- [ ]Register Page
+
+- [ ] Register Page
      - [ ] User or Rider
 
 - [ ] Login Page
