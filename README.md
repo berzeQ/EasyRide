@@ -3,7 +3,7 @@
 
 
 ## Roadmap 
-    - [x] Landing Page
+- [x] Landing Page
  - [ ] Rider or Passenger?
             - [ ] login as a Rider -> rider landing page
             - [ ] Login as a passenger -> passenger landing page
@@ -22,10 +22,10 @@
 
 
 ## Features
-   - [] Role Switch
-    - [] All vehicle Option
-    - [] Bargaining
-    - [] Rider Rating
-    - [] show Driver info
-    - [] 
+ - [] Role Switch
+ - [] All vehicle Option
+ - [] Bargaining
+ - [] Rider Rating
+ - [] show Driver info
+ - [] 
 
