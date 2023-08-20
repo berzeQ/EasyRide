@@ -3,17 +3,17 @@
 
 
 ## Roadmap 
-    [X] Landing Page
-        [] Rider or Passenger?
-            [] login as a Rider -> rider landing page
-            [] Login as a passenger -> passenger landing page
+    - [X] Landing Page
+        - [] Rider or Passenger?
+            - [] login as a Rider -> rider landing page
+            - [] Login as a passenger -> passenger landing page
 
-    []Register Page
-        [] User or Rider
+    - []Register Page
+       - [] User or Rider
 
-    [] Login Page
-        [] Rider Login
-        [] Passenger Login
+    - [] Login Page
+       - [] Rider Login
+        - [] Passenger Login
 
 
 
