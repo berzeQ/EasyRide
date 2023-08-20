@@ -8,7 +8,7 @@
      - [ ] login as a Rider -> rider landing page
      - [ ] Login as a passenger -> passenger landing page
 
-    - [ ]Register Page
+ - [ ]Register Page
        - [ ] User or Rider
 
     - [ ] Login Page
@@ -23,10 +23,10 @@
 
 ## Features
 
-- [] Role Switch
-- [] All vehicle Option
-- [] Bargaining
-- [] Rider Rating
-- [] show Driver info
-- [] 
+- [ ] Role Switch
+- [ ] All vehicle Option
+- [ ] Bargaining
+- [ ] Rider Rating
+- [ ] show Driver info
+- [ ] 
 
