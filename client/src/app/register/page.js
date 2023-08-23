@@ -14,7 +14,12 @@ const SignupSchema = Yup.object().shape({
     .min(2, 'Too Short!')
     .max(50, 'Too Long!')
     .required('Required'),
-  password: Yup.string().password('Invalid password').required('Required'),
+    password: Yup.string()
+    .matches(
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+      'Invalid password: Password must contain at least 8 characters, including uppercase, lowercase, digits, and special characters.'
+    )
+    .required('Required')
 });
  const Register = () => (
   <div>

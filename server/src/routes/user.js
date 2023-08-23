@@ -9,13 +9,10 @@ router.get("/users", UserController.GetAllUser)
     
 router.post('/register', UserController.CreateNewUser)
 
- 
- 
 router.put('/users/:id', UserController.UpdateUser)
- 
+
 router.delete('/users/:id', UserController.DeleteUserById)
- 
- 
+
 router.get('/users/:id', UserController.GetUserById)
 
 module.exports = router;

@@ -1,4 +1,6 @@
 const User = require('../models/user');
+const bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 
 
@@ -10,11 +12,25 @@ const GetAllUser = async (req,res)=>{
 };
 
 const CreateNewUser = async (req, res) => {
-    const data = await User.create(req.body)
+    const plainPW = req.body.password;
+    
+    const hashPW = await  bcrypt.hash(plainPW, saltRounds);
+    req.body.password = hashPW;  
+    console.log(hashPW)
+
+    const userExist = await User.exists({phoneNumber: req.body.phoneNumber})
+       
+
+    if(userExist == null){
+    const data =  User.create(req.body)
     if(data){
-      res.json
+      res.json('user created')
     }
     }
+    else {
+        res.json('user already exist ')
+    }
+}
 
 const UpdateUser =  async (req, res) => {
     await User.findByIdAndUpdate(req.params.id, req.body)

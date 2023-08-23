@@ -1,10 +1,19 @@
 const mongoose = require('mongoose')
 const userSchema = new mongoose.Schema({
     fullName: String,
-    phoneNumber: Number,
-    email: String,
+    phoneNumber: {type: String, required: true, unique: true},
+    email: {type: String, unique: true},
     password: String,
-    online: Boolean
+    online: Boolean,
+    role :{
+      type: String,
+      enum: ['Rider', 'User','Admin', 'Guest-User'],
+      default: 'Guest-User' 
+    },
+    licenseDetail: String,
+    userCart : Array,
+    userWishList : Array
+
   });
    
   const User = mongoose.model('User', userSchema);
