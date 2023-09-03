@@ -1,0 +1,65 @@
+.container{
+    background-color: #040D12;
+    color: #93B1A6;
+    height: 120vh;
+    top:0;
+    left:0;
+    margin: 0;
+    padding: 0;
+
+}
+.form{
+    background-color: #183D3D;
+    color: #93B1A6;
+    margin: 5% 32%;
+    text-align: center;
+    padding: 20px;
+    width: 40%;
+    position: absolute;
+   
+}
+
+.header{
+    text-align: center;
+    color: #93B1A6;
+    font-size: 45px;
+    font-weight: bold;
+    font-family: sans-serif;
+    padding: 50px 20px;
+}
+
+
+.formInput{
+    padding: 1.2rem;
+    width: 100%;
+    color: #040D12;
+    border-radius: 5px;
+    margin-top: 30px;
+    
+   
+}
+.formInput::placeholder {
+    color: #040D12; 
+    font-size: 24px; 
+    font-weight: 700;
+}
+.submitBtn{
+    margin-top: 3rem;
+    margin-bottom: 15px;
+    width: 90%;
+    padding: 15px;
+    font-size: 1.8rem;
+    font-family: sans-serif;
+    background-color: #5C8374;
+    border: 1px solid  #5C8374;
+    border-radius: 20px;
+    color: #93B1A6;
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+}
+
+.submitBtn:hover {
+    background-color: #040D12; /* Change to your desired hover background color */
+    color: #fff; /* Change to your desired hover text color */
+    border-color: #040D12; /* Change to your desired hover border color */
+    cursor: pointer; /* Set the cursor to a pointer */
+  }

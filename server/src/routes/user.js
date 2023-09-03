@@ -8,6 +8,8 @@ router.get("/users", UserController.GetAllUser)
     
     
 router.post('/register', UserController.CreateNewUser)
+router.post('/login', UserController.LoginUser)
+
 
 router.put('/users/:id', UserController.UpdateUser)
 

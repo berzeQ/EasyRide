@@ -1,7 +1,7 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
 const saltRounds = 10;
-
+const jwt = require('jsonwebtoken');
 
 
 const GetAllUser = async (req,res)=>{
@@ -13,6 +13,7 @@ const GetAllUser = async (req,res)=>{
 
 const CreateNewUser = async (req, res) => {
     const plainPW = req.body.password;
+    console.log(req.body.password)
     
     const hashPW = await  bcrypt.hash(plainPW, saltRounds);
     req.body.password = hashPW;  
@@ -24,12 +25,39 @@ const CreateNewUser = async (req, res) => {
     if(userExist == null){
     const data =  User.create(req.body)
     if(data){
-      res.json('user created')
+      res.json('User has been created')
     }
     }
     else {
-        res.json('user already exist ')
+        res.status(409).json('User already exist ')
     }
+}
+
+const LoginUser = async (req,res) =>{
+    console.log(req.body.phoneNumber)
+    const userExist = await User.findOne({phoneNumber: req.body.phoneNumber});
+    console.log(userExist.password)
+    if(userExist == null){
+        res.status(404).json("User doesn't exist");
+        console.log(userExist)
+    }
+    else{
+        const isMatched = await bcrypt.compare(req.body.password, userExist.password) ;
+        console.log(isMatched);
+        if(isMatched){
+            const token = await jwt.sign({ phoneNumber: req.body.phoneNumber}, process.env.SECRET_KEY);
+            console.log(token)
+
+
+            res.status(200).json( {isLoggedIn : true , msg : "User Logged In Successfully", token });
+
+        }
+        else{
+            res.status(404).json("User Password doesn't match");
+
+        }
+    }
+    
 }
 
 const UpdateUser =  async (req, res) => {
@@ -44,5 +72,5 @@ const GetUserById =  async (req, res) => {
     res.json({data})
     }
 
-module.exports = {GetAllUser, CreateNewUser, UpdateUser, DeleteUserById, GetUserById};
+module.exports = {GetAllUser, CreateNewUser, UpdateUser, DeleteUserById, GetUserById, LoginUser};
 
