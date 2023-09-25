@@ -3,6 +3,11 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import styles from '../../styles/register.module.css' ;
 import { useToast } from '@chakra-ui/react';
+import { Montserrat} from 'next/font/google';
+import { handleLogin } from '../index';
+import Link from 'next/link';
+
+const montserrat = Montserrat({ subsets: ['latin'] })
 
 const SignupSchema = Yup.object().shape({
   fullName: Yup.string()
@@ -17,7 +22,7 @@ const SignupSchema = Yup.object().shape({
   password: Yup.string()
     .required("Please enter a password")
     .min(8, "Password must have at least 8 characters")
-    .matches(/[0-9]/, "Password must include at least one digit")
+    .matches(/[0-9]/, "Passwor  d must include at least one digit")
     .matches(/[a-z]/, "Password must include at least one lowercase letter")
     .matches(/[A-Z]/, "Password must include at least one uppercase letter"),
     confirmPassword: Yup.string()
@@ -51,9 +56,9 @@ const Register = () => {
 
 
   return(
-    <div className = {styles.container}>
+    <div className = {`${styles.container}  ${montserrat.className}`}>
        <div className={styles.form}>
-          <h1 className={styles.header}>Signup</h1>
+          <h1 className={styles.formHeader}>Signup</h1>
           <Formik
             initialValues={{
               fullName: '',
@@ -75,12 +80,12 @@ const Register = () => {
         <Form>
           <Field className={styles.formInput} name="fullName" placeholder='Full Name' />
           {errors.fullName && touched.fullName ? (
-            <div>{errors.fullName}</div>
+            <div className = {styles.errorMsg}>{errors.fullName}</div>
           ) : null}
           <br />
           <Field  className={styles.formInput} name="phoneNumber"  placeholder = 'Phone Number'/>
           {errors.phoneNumber && touched.phoneNumber ? (
-            <div>{errors.phoneNumber}</div>
+            <div className = {styles.errorMsg}>{errors.phoneNumber}</div>
           ) : null}
           <br />
           <Field 
@@ -89,7 +94,7 @@ const Register = () => {
           name="email"
            type="email" 
             />
-          {errors.email && touched.email ? <div>{errors.email}</div> : null}
+          {errors.email && touched.email ? <div className = {styles.errorMsg}>{errors.email}</div> : null}
           <br />
           <Field
                 className={styles.formInput}
@@ -98,7 +103,7 @@ const Register = () => {
                 placeholder="Password"
                 />
                 {errors.password && touched.password ? (
-                <div>{errors.password}</div>
+                <div className = {styles.errorMsg}>{errors.password}</div>
                 ) : null}
                 <br />
           <Field
@@ -108,9 +113,12 @@ const Register = () => {
                 placeholder="Confirm Password"
                 />
                 {errors.confirmPassword && touched.confirmPassword ? (
-                <div>{errors.confirmPassword}</div>
+                <div className = {styles.errorMsg}>{errors.confirmPassword}</div>
                 ) : null}
 <br />
+                  <div className={styles.noAccount}>
+                    <Link href='/login'>Already have an Account? Click here</Link>
+                  </div>
           <button className={styles.submitBtn} type="submit">Submit</button>
         </Form>
       )}

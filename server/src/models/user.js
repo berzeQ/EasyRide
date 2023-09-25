@@ -12,7 +12,8 @@ const userSchema = new mongoose.Schema({
     },
     licenseDetail: String,
     userCart : Array,
-    userWishList : Array
+    userWishList : Array,
+    avatar: String,
 
   });
    

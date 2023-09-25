@@ -3,6 +3,15 @@ import { Formik, Form, Field } from 'formik';
 import * as Yup from 'yup';
 import styles from '../../styles/register.module.css' ;
 import { useToast } from '@chakra-ui/react';
+import { useDispatch } from 'react-redux';
+import { setLoginDetails } from '@/redux/reducerSlices/userSlice';
+import { useRouter } from 'next/router';
+import Link from 'next/link';
+import { Montserrat} from 'next/font/google'
+
+
+const montserrat = Montserrat({ subsets: ['latin'] })
+
 
 const LoginSchema = Yup.object().shape({
   phoneNumber: Yup.string()
@@ -19,7 +28,10 @@ const LoginSchema = Yup.object().shape({
     });
 
 const Login = () => {
-  const toast = useToast()
+  const toast = useToast();
+  const dispatch = useDispatch();
+  const router = useRouter();
+
   const statuses = ['success', 'error', 'warning', 'info']
 
   const handleLogin = async (values)=>{
@@ -31,13 +43,18 @@ const Login = () => {
 
     )
     const data  = await res.json();
+    if(data.isLoggedIn){
+      dispatch(setLoginDetails(data));
+      router.push('/')
+
+    }
     console.log(data);
     // if()
     toast({
       title: data.msg,
       // description: "We've created your account for you.",
       status: res.status === 404 ? 'error' : 'success',
-      duration: 9000,
+      duration: 3000,
       isClosable: true,
     })
     
@@ -45,10 +62,10 @@ const Login = () => {
 
 
   return(
-    <div className = {styles.container}>
-  <div className={styles.form}>
-    <h1 className={styles.header}>Sign In</h1>
-    <Formik
+    <div className = {`${styles.container}  ${montserrat.className}`}>
+        <div className={styles.form}>
+        <h1 className={styles.formHeader}>Sign In</h1>
+           <Formik
       initialValues={{
   
         phoneNumber: '',
@@ -70,7 +87,7 @@ const Login = () => {
           
           <Field  className={styles.formInput} name="phoneNumber"  placeholder = 'Phone Number'/>
           {errors.phoneNumber && touched.phoneNumber ? (
-            <div>{errors.phoneNumber}</div>
+            <div className = {styles.errorMsg}>{errors.phoneNumber}</div>
           ) : null}
           <br />
           
@@ -81,10 +98,17 @@ const Login = () => {
                 placeholder="Password"
                 />
                 {errors.password && touched.password ? (
-                <div>{errors.password}</div>
+                <div className = {styles.errorMsg}>{errors.password}</div>
                 ) : null}
                 <br />
-         
+          <div className={styles.optionBtn}>
+              <div className={styles.noAccount}>
+                  <Link href="/register">Create an account</Link>
+                </div>
+              <div className={styles.forgotPass}>
+                      <Link href="/forgotPass">Forgot Password?</Link>
+                </div>
+          </div>
           <button className={styles.submitBtn} type="submit">Login</button>
         </Form>
       )}

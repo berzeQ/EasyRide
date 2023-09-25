@@ -2,6 +2,35 @@
 @tailwind components;
 @tailwind utilities; */
 
-body{
+html, body{
+   
     background-color: #040D12;
+    height: 100%;
+}
+.mainBtn{
+    display: inline-block;
+    padding: 10px 20px;
+    margin: 10px 20px;
+    background-color: rgb(64, 57, 114);
+    transition: background-color 0.3s, color 0.3s, border-color 0.3s;
+
+}
+.mainBtn:hover {
+    background-color: #040D12; /* Change to your desired hover background color */
+    color: #fff; /* Change to your desired hover text color */
+    border-color: #040D12; /* Change to your desired hover border color */
+    cursor: pointer; /* Set the cursor to a pointer */
+  }
+.mainBody{
+    background-color: #483c4e;
+    height: 100% vh;
+    color: white;
+    text-align: right;
+}
+main{
+    background-color: #040D12;
+    height: 100vh;
+}
+h1{
+    font-size: 3rem;
 }

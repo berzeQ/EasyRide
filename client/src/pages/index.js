@@ -1,26 +1,236 @@
-import Image from 'next/image'
-import { Inter } from 'next/font/google'
+import Image from "next/image";
+import { Montserrat } from "next/font/google";
+import { useSelector } from "react-redux";
+import styles from "../styles/register.module.css";
+import { useRouter } from "next/router";
 
-const inter = Inter({ subsets: ['latin'] })
+import { Input } from "@chakra-ui/react";
+import {
+  GoogleMap,
+  useJsApiLoader,
+  Autocomplete,
+  MarkerF,
+} from "@react-google-maps/api";
+import { useState, useRef, useEffect, useMemo } from "react";
+import PlacesCard from "../components/searchinput/PlacesCard";
+import DestinationCard from "../components/searchinput/destinationSearch";
+import CustomMenu from "../components/CustomeMenu/CustomMenu";
+import Getgeolocation from "../components/GoogleMaps/Getgeolocation";
+import { Marker } from "@react-google-maps/api";
 
+const libraries = ["places"];
+
+const montserrat = Montserrat({ subsets: ["latin"] });
+
+//*********************************************************** */
 export default function Home() {
+  let customIcon = {};
+
+  const router = useRouter();
+
+  //for whether mouse is overing the input and result div
+  const [isSelectionOngoing, setIsSelectionOngoing] = useState(false);
+
+  // for token login
+  const { token, id, isLoggedIn } = useSelector((state) => state.user);
+  const [placesList, setPlacesList] = useState([]);
+  const [placesListDestination, setPlacesListDestination] = useState([]);
+
+  //for sending value to input field when clicked on the li i.e results
+  const [pickInputAddress, setPickInputAddress] = useState("");
+  const [destinationAddress, setDestinationAddress] = useState("");
+
+  //makes the search results block to display
+  const [pickUpOpen, setPickUpOpen] = useState(false);
+  const [destinationOpen, setDestinationOpen] = useState(false);
+
+  //inputs the search result formatted into the states
+  const [searchedPlaceList, setSearchedPlaceList] = useState([]);
+  const [searchDestinationList, setSearchDestinationList] = useState([]);
+
+  // const [pickUpRef, setPickUpRef] = useState(false)
+  // const [destinationRef, setDestinationRef] = useState(false)
+
+  const [currentPos, setCurrentPos] = useState({
+    lat: "",
+    lng: "",
+  });
+  const [centerPos, setCenterPos] = useState({
+    lat: 27.700769,
+    lng: 85.30014,
+  });
+  // useEffect({
+
+  // })
+  const [destinationPos, setDestinationPos] = useState({
+    lat: "",
+    lng: "",
+  });
+  const [map, setMap] = useState(/** @type google.maps.Map */ (null));
+  const [directionsResponse, setDirectionsResponse] = useState(null);
+  const [distance, setDistance] = useState("");
+  const [duration, setDuration] = useState("");
+
+  const originRef = useRef();
+  const destiantionRef = useRef();
+
+  const { isLoaded, loadError } = useJsApiLoader({
+    id: "google-map-script",
+    googleMapsApiKey: "AIzaSyDLfjmFgDEt9_G2LXVyP61MZtVHE2M3H-0",
+    libraries: libraries,
+  });
+
+  if (!isLoaded) {
+    return;
+  }
+
+  async function calculateRoute() {
+    if (originRef.current.value === "" || destiantionRef.current.value === "") {
+      return;
+    }
+    // eslint-disable-next-line no-undef
+    const directionsService = new google.maps.DirectionsService();
+    const results = await directionsService.route({
+      origin: originRef.current.value,
+      destination: destiantionRef.current.value,
+      // eslint-disable-next-line no-undef
+      travelMode: google.maps.TravelMode.DRIVING,
+    });
+    setDirectionsResponse(results);
+    setDistance(results.routes[0].legs[0].distance.text);
+    setDuration(results.routes[0].legs[0].duration.text);
+  }
+
+  function clearRoute() {
+    setDirectionsResponse(null);
+    setDistance("");
+    setDuration("");
+    originRef.current.value = "";
+    destiantionRef.current.value = "";
+  }
+
+  const handleCenteringMap = () => {
+    return (
+      console.log("hello"),
+      map.panTo(currentPos),
+      map.setZoom(15),
+      setCenterPos(currentPos)
+    );
+  };
+  const handlePickUpLocationZoom = async () => {
+    map.onLoad && console.log("Hello"); // Just for testing
+    setCenterPos(currentPos);
+
+    map.panTo(centerPos);
+    map.setZoom(15);
+  };
+
+  const handleDestinationZoom = async () => {
+    if (isLoaded) {
+      map.onLoad && console.log("Hello"); // Just for testing
+      map.panTo(destinationPos);
+      map.setZoom(15);
+      setCenterPos(destinationPos);
+    }
+  };
+
+  const generatePlaces = async (text) => {
+    setPickUpOpen(true);
+    setPickInputAddress(text);
+    try {
+      const res = await fetch(
+        `https://api.geoapify.com/v1/geocode/autocomplete?text=${text}&format=json&apiKey=a1dd45a7dfc54f55a44b69d125722fcb`
+      );
+      const data = await res.json();
+      if (data.results) {
+        setSearchedPlaceList(data.results);
+      }
+    } catch (error) {
+      console.error("Error fetching places:", error);
+    }
+  };
+
+  const generateDestination = async (text) => {
+    setDestinationOpen(true);
+    setDestinationAddress(text);
+    try {
+      const res = await fetch(
+        `https://api.geoapify.com/v1/geocode/autocomplete?text=${text}&format=json&apiKey=a1dd45a7dfc54f55a44b69d125722fcb`
+      );
+      const data = await res.json();
+      if (data.results) {
+        setSearchDestinationList(data.results);
+      }
+    } catch (error) {
+      console.error("Error fetching destination:", error);
+    }
+  };
+
+  if (isLoaded) {
+    customIcon = {
+      url: "favicon.ico",
+      scaledSize: new window.google.maps.Size(50, 50),
+    };
+  }
+
+  async function pickUpLocationBasedOnMarker(lat, lng) {
+    try {
+      const res = await fetch(
+        `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lng}&apiKey=a1dd45a7dfc54f55a44b69d125722fcb`
+      );
+      const data = await res.json();
+      if (data) {
+        console.log(data.features[0].properties.formatted);
+        originRef.current.value = data.features[0].properties.formatted;
+      }
+    } catch (error) {
+      console.error("Error fetching destination:", error);
+    }
+  }
+  async function destinationLocationBasedOnMarker(lat, lng) {
+    try {
+      const res = await fetch(
+        `https://api.geoapify.com/v1/geocode/reverse?lat=${lat}&lon=${lng}&apiKey=a1dd45a7dfc54f55a44b69d125722fcb`
+      );
+      const data = await res.json();
+      if (data) {
+        console.log(data.features[0].properties.formatted);
+        destiantionRef.current.value = data.features[0].properties.formatted;
+      }
+    } catch (error) {
+      console.error("Error fetching destination:", error);
+    }
+  }
+
   return (
     <main
-      className={`flex min-h-screen flex-col items-center justify-between p-24 ${inter.className}`}
+      className={`flex min-h-screen flex-col items-center justify-between p-24${montserrat.className}  `}
     >
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/pages/index.js</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
+      <div className="navbarMain mainBody">
+        {!token ? (
+          <div>
+            <button
+              className="mainBtn"
+              type="button"
+              onClick={() => router.push("/login")}
+            >
+              Login
+            </button>
+            <button
+              className="mainBtn"
+              type="button"
+              onClick={() => router.push("/register")}
+            >
+              Register
+            </button>
+          </div>
+        ) : (
+          <CustomMenu color="#fff" token={token} />
+        )}
+
+        <div>
+          <a>
+            By{" "}
             <Image
               src="/vercel.svg"
               alt="Vercel Logo"
@@ -33,86 +243,148 @@ export default function Home() {
         </div>
       </div>
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700/10 after:dark:from-sky-900 after:dark:via-[#0141ff]/40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
+      {/* MAIN BODY FOR LANDING PAGE */}
+
+      <div className="mainLandingPageBody">
+        <Getgeolocation
+          setCurrentPos={setCurrentPos}
+          currentPos={currentPos}
+          setDestinationPos={setDestinationPos}
         />
+
+        {/* LOCATION INFUL FIELD */}
+        <div className={styles.locationInput}>
+          <div className={styles.setLocation}>
+            <Input
+              ref={originRef}
+              className={styles.inputPlace}
+              focusBorderColor="#483C4E"
+              placeholder="Enter Your Location"
+              value={pickInputAddress}
+              type="text"
+              onFocus={() => {
+                setIsSelectionOngoing(true);
+                setDestinationOpen(false);
+              }}
+              onBlur={() => !isSelectionOngoing && setPickUpOpen(false)}
+              onChange={(e) => generatePlaces(e.target.value)}
+            />
+
+            {pickUpOpen && (
+              <PlacesCard
+                isSelectionOngoing={isSelectionOngoing}
+                setIsSelectionOngoing={setIsSelectionOngoing}
+                setPickUpOpen={setPickUpOpen}
+                setPickInputAddress={setPickInputAddress}
+                searchedPlaceList={searchedPlaceList}
+                setCurrentPos={setCurrentPos}
+                handlePickUpLocationZoom={handlePickUpLocationZoom}
+              />
+            )}
+
+            <br />
+            <br />
+            <br />
+
+            <div className={styles.setDestination}>
+              <Input
+                ref={destiantionRef}
+                className={styles.inputPlace}
+                focusBorderColor="#483C4E"
+                placeholder="Enter Your Destination"
+                value={destinationAddress}
+                type="text"
+                onFocus={() => {
+                  setIsSelectionOngoing(true);
+                  setPickUpOpen(false);
+                }}
+                onBlur={() => !isSelectionOngoing && setDestinationOpen(false)}
+                onChange={(e) => generateDestination(e.target.value)}
+              />
+
+              {destinationOpen && (
+                <DestinationCard
+                  isSelectionOngoing={isSelectionOngoing}
+                  setIsSelectionOngoing={setIsSelectionOngoing}
+                  setDestinationOpen={setDestinationOpen}
+                  setDestinationAddress={setDestinationAddress}
+                  searchDestinationList={searchDestinationList}
+                  setDestinationPos={setDestinationPos}
+                  handleDestinationZoom={handleDestinationZoom}
+                />
+              )}
+              <br />
+            </div>
+          </div>
+          <button
+            className={styles.centerMap}
+            onClick={() => {
+              handleCenteringMap();
+              calculateRoute();
+            }}
+            type="button"
+          >
+            To Center
+          </button>
+        </div>
+
+        <br />
+        <br />
+        <br />
+        <br />
+
+        {/* GOOGLE MAP USING API  */}
+        <div className={styles.gmapAPI}>
+          {isLoaded && (
+            <GoogleMap
+              id="circle-example"
+              mapContainerStyle={{
+                height: "700px",
+                width: "1000px",
+              }}
+              zoom={12}
+              center={centerPos}
+              onLoad={(map) => setMap(map)}
+            >
+              <MarkerF
+                draggable={true}
+                position={currentPos}
+                icon={customIcon}
+                onDragEnd={(e) => {
+                  console.log(e.latLng.lat(), e.latLng.lng());
+                  pickUpLocationBasedOnMarker(e.latLng.lat(), e.latLng.lng());
+                }}
+              />
+              <MarkerF
+                draggable={true}
+                position={destinationPos}
+                // icon={customIcon}
+                onDragEnd={(e) => {
+                  console.log(e.latLng.lat(), e.latLng.lng());
+                  destinationLocationBasedOnMarker(
+                    e.latLng.lat(),
+                    e.latLng.lng()
+                  );
+                }}
+              />
+              {directionsResponse && (
+                <DirectionsRenderer directions={directionsResponse} />
+              )}
+            </GoogleMap>
+          )}
+
+          {isLoaded && (
+            <Autocomplete>
+              <input type="text" />
+            </Autocomplete>
+          )}
+        </div>
       </div>
 
-      <div className="mb-32 grid text-center lg:max-w-5xl lg:w-full lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Discover and deploy boilerplate example Next.js&nbsp;projects.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+      <br />
+      <br />
+      <br />
+      <br />
     </main>
-  )
+  );
 }
