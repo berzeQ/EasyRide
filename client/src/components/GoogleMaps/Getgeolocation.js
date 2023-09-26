@@ -21,8 +21,12 @@ const Getgeolocation = (props) => {
           props.setCurrentPos({ lat: latitude, lng: longitude });
           props.setDestinationPos({ lat: latitude, lng: longitude });
 
+          props.originRef?.current?.focus();
+
           // Do something with the latitude and longitude data
-          console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+          console.log(
+            `Latitude: ${latitude}, Longitude: ${longitude},${props.originRef} `
+          );
         },
         (error) => {
           console.error("Error getting location:", error);

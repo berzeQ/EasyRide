@@ -22,7 +22,14 @@ const PlacesCard = (props) => {
                       lat: item.lat,
                       lng: item.lon,
                     });
-                    props.handlePickUpLocationZoom();
+                    // props.handlePickUpLocationZoom();
+                    props.setCenterPos({
+                      lat: item.lat,
+                      lng: item.lon,
+                    });
+                    props.setZoom(14);
+
+                    console.log(item);
                   }}
                   className={styles.searchLists}
                 >

@@ -22,8 +22,13 @@ const DestinationCard = (props) => {
                       lat: item.lat,
                       lng: item.lon,
                     });
+                    props.setCenterPos({
+                      lat: item.lat,
+                      lng: item.lon,
+                    });
 
-                    props.handleDestinationZoom();
+                    // props.handleDestinationZoom();
+                    props.setZoom(14);
                   }}
                   className={styles.searchLists}
                 >

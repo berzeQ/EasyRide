@@ -139,6 +139,10 @@
 
 
 }
+.mainLandingPageBody{
+    display: grid;
+    grid-template-columns: auto;
+}
 
 .setLocation {
     position: relative;

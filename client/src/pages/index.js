@@ -6,6 +6,7 @@ import { useRouter } from "next/router";
 
 import { Input } from "@chakra-ui/react";
 import {
+  Circle,
   GoogleMap,
   useJsApiLoader,
   Autocomplete,
@@ -33,8 +34,8 @@ export default function Home() {
 
   // for token login
   const { token, id, isLoggedIn } = useSelector((state) => state.user);
-  const [placesList, setPlacesList] = useState([]);
-  const [placesListDestination, setPlacesListDestination] = useState([]);
+  // const [placesList, setPlacesList] = useState([]);
+  // const [placesListDestination, setPlacesListDestination] = useState([]);
 
   //for sending value to input field when clicked on the li i.e results
   const [pickInputAddress, setPickInputAddress] = useState("");
@@ -66,13 +67,16 @@ export default function Home() {
     lat: "",
     lng: "",
   });
-  const [map, setMap] = useState(/** @type google.maps.Map */ (null));
-  const [directionsResponse, setDirectionsResponse] = useState(null);
+  // const [map, setMap] = useState(/** @type google.maps.Map */ (null));
+  // const [directionsResponse, setDirectionsResponse] = useState(null);
   const [distance, setDistance] = useState("");
   const [duration, setDuration] = useState("");
 
-  const originRef = useRef();
-  const destiantionRef = useRef();
+  const originRef = useRef(null);
+  // console.log(originRef?.current?.focus(), "hello");
+  const [zoom, setZoom] = useState(13);
+
+  const destiantionRef = useRef(null);
 
   const { isLoaded, loadError } = useJsApiLoader({
     id: "google-map-script",
@@ -80,59 +84,54 @@ export default function Home() {
     libraries: libraries,
   });
 
-  if (!isLoaded) {
-    return;
-  }
+  // if (!isLoaded) {
+  //   return;
+  // }
 
-  async function calculateRoute() {
-    if (originRef.current.value === "" || destiantionRef.current.value === "") {
-      return;
-    }
-    // eslint-disable-next-line no-undef
-    const directionsService = new google.maps.DirectionsService();
-    const results = await directionsService.route({
-      origin: originRef.current.value,
-      destination: destiantionRef.current.value,
-      // eslint-disable-next-line no-undef
-      travelMode: google.maps.TravelMode.DRIVING,
-    });
-    setDirectionsResponse(results);
-    setDistance(results.routes[0].legs[0].distance.text);
-    setDuration(results.routes[0].legs[0].duration.text);
-  }
+  // async function calculateRoute() {
+  //   if (originRef.current.value === "" || destiantionRef.current.value === "") {
+  //     return;
+  //   }
+  //   // eslint-disable-next-line no-undef
+  //   const directionsService = new google.maps.DirectionsService();
+  //   const results = await directionsService.route({
+  //     origin: originRef.current.value,
+  //     destination: destiantionRef.current.value,
+  //     // eslint-disable-next-line no-undef
+  //     travelMode: google.maps.TravelMode.DRIVING,
+  //   });
+  //   setDirectionsResponse(results);
+  //   setDistance(results.routes[0].legs[0].distance.text);
+  //   setDuration(results.routes[0].legs[0].duration.text);
+  // }
 
-  function clearRoute() {
-    setDirectionsResponse(null);
-    setDistance("");
-    setDuration("");
-    originRef.current.value = "";
-    destiantionRef.current.value = "";
-  }
+  // function clearRoute() {
+  //   setDirectionsResponse(null);
+  //   setDistance("");
+  //   setDuration("");
+  //   originRef.current.value = "";
+  //   destiantionRef.current.value = "";
+  // }
 
   const handleCenteringMap = () => {
-    return (
-      console.log("hello"),
-      map.panTo(currentPos),
-      map.setZoom(15),
-      setCenterPos(currentPos)
-    );
+    return console.log("hello"), setCenterPos(currentPos);
   };
-  const handlePickUpLocationZoom = async () => {
-    map.onLoad && console.log("Hello"); // Just for testing
-    setCenterPos(currentPos);
+  // const handlePickUpLocationZoom = async () => {
+  //   map.onLoad && console.log("Hello"); // Just for testing
+  //   setCenterPos(currentPos);
 
-    map.panTo(centerPos);
-    map.setZoom(15);
-  };
+  //   map.panTo(centerPos);
+  //   map.setZoom(15);
+  // };
 
-  const handleDestinationZoom = async () => {
-    if (isLoaded) {
-      map.onLoad && console.log("Hello"); // Just for testing
-      map.panTo(destinationPos);
-      map.setZoom(15);
-      setCenterPos(destinationPos);
-    }
-  };
+  // const handleDestinationZoom = async () => {
+  //   if (isLoaded) {
+  //     map.onLoad && console.log("Hello"); // Just for testing
+  //     map.panTo(destinationPos);
+  //     map.setZoom(15);
+  //     setCenterPos(destinationPos);
+  //   }
+  // };
 
   const generatePlaces = async (text) => {
     setPickUpOpen(true);
@@ -181,7 +180,8 @@ export default function Home() {
       const data = await res.json();
       if (data) {
         console.log(data.features[0].properties.formatted);
-        originRef.current.value = data.features[0].properties.formatted;
+        // originRef.current.value = data.features[0].properties.formatted;
+        setPickInputAddress(data.features[0].properties.formatted);
       }
     } catch (error) {
       console.error("Error fetching destination:", error);
@@ -195,7 +195,8 @@ export default function Home() {
       const data = await res.json();
       if (data) {
         console.log(data.features[0].properties.formatted);
-        destiantionRef.current.value = data.features[0].properties.formatted;
+        // destiantionRef.current.value = data.features[0].properties.formatted;
+        setDestinationAddress(data.features[0].properties.formatted);
       }
     } catch (error) {
       console.error("Error fetching destination:", error);
@@ -245,11 +246,12 @@ export default function Home() {
 
       {/* MAIN BODY FOR LANDING PAGE */}
 
-      <div className="mainLandingPageBody">
+      <div className={styles.mainLandingPageBody}>
         <Getgeolocation
           setCurrentPos={setCurrentPos}
           currentPos={currentPos}
           setDestinationPos={setDestinationPos}
+          originRef={originRef}
         />
 
         {/* LOCATION INFUL FIELD */}
@@ -265,8 +267,11 @@ export default function Home() {
               onFocus={() => {
                 setIsSelectionOngoing(true);
                 setDestinationOpen(false);
+                setZoom(12);
               }}
-              onBlur={() => !isSelectionOngoing && setPickUpOpen(false)}
+              onBlur={() => {
+                !isSelectionOngoing && setPickUpOpen(false);
+              }}
               onChange={(e) => generatePlaces(e.target.value)}
             />
 
@@ -278,7 +283,10 @@ export default function Home() {
                 setPickInputAddress={setPickInputAddress}
                 searchedPlaceList={searchedPlaceList}
                 setCurrentPos={setCurrentPos}
-                handlePickUpLocationZoom={handlePickUpLocationZoom}
+                // handlePickUpLocationZoom={handlePickUpLocationZoom}
+                originRef={originRef}
+                setCenterPos={setCenterPos}
+                setZoom={setZoom}
               />
             )}
 
@@ -297,6 +305,7 @@ export default function Home() {
                 onFocus={() => {
                   setIsSelectionOngoing(true);
                   setPickUpOpen(false);
+                  setZoom(12);
                 }}
                 onBlur={() => !isSelectionOngoing && setDestinationOpen(false)}
                 onChange={(e) => generateDestination(e.target.value)}
@@ -310,7 +319,9 @@ export default function Home() {
                   setDestinationAddress={setDestinationAddress}
                   searchDestinationList={searchDestinationList}
                   setDestinationPos={setDestinationPos}
-                  handleDestinationZoom={handleDestinationZoom}
+                  // handleDestinationZoom={handleDestinationZoom}
+                  setCenterPos={setCenterPos}
+                  setZoom={setZoom}
                 />
               )}
               <br />
@@ -320,7 +331,6 @@ export default function Home() {
             className={styles.centerMap}
             onClick={() => {
               handleCenteringMap();
-              calculateRoute();
             }}
             type="button"
           >
@@ -342,9 +352,9 @@ export default function Home() {
                 height: "700px",
                 width: "1000px",
               }}
-              zoom={12}
+              zoom={zoom}
               center={centerPos}
-              onLoad={(map) => setMap(map)}
+              // onLoad={(map) => setMap(map)}
             >
               <MarkerF
                 draggable={true}
@@ -353,6 +363,19 @@ export default function Home() {
                 onDragEnd={(e) => {
                   console.log(e.latLng.lat(), e.latLng.lng());
                   pickUpLocationBasedOnMarker(e.latLng.lat(), e.latLng.lng());
+                  setCenterPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+                  setZoom(14);
+                }}
+              />
+              <Circle
+                center={currentPos}
+                radius={1000} // Adjust the radius in meters as needed
+                options={{
+                  strokeColor: "#FF0000",
+                  strokeOpacity: 0.8,
+                  strokeWeight: 2,
+                  fillColor: "#FF0000",
+                  fillOpacity: 0.35,
                 }}
               />
               <MarkerF
@@ -365,11 +388,13 @@ export default function Home() {
                     e.latLng.lat(),
                     e.latLng.lng()
                   );
+                  setCenterPos({ lat: e.latLng.lat(), lng: e.latLng.lng() });
+                  setZoom(14);
                 }}
               />
-              {directionsResponse && (
+              {/* {directionsResponse && (
                 <DirectionsRenderer directions={directionsResponse} />
-              )}
+              )} */}
             </GoogleMap>
           )}
 
